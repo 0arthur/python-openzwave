@@ -94,6 +94,13 @@ python-openzwave 0.4.0 is coming !!!
     
         (venvX) pip install python_openzwave --install-option="--flavor=git"
 
+ - Build a wheel archive, this does not support passing "--install-option" so
+   we set `PY_LIB_FLAVOR` in the environment :
+
+    .. code-block:: bash
+
+        (venvX) PY_LIB_FLAVOR=git pip wheel python_openzwave
+
  - You can update to the last version of openzwave using the git flavor :
         
     .. code-block:: bash

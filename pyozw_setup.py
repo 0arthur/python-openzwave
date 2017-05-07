@@ -244,7 +244,7 @@ class Template(object):
     def finalize_context(self, ctx):
         self.clean_cython()
         if self.flavor:
-            ctx['define_macros'] += [('PY_LIB_FLAVOR', self.flavor.replace('--flavor=',''))]
+            ctx['define_macros'] += [('PY_LIB_FLAVOR', self.flavor)]
         else:
             ctx['define_macros'] += [('PY_LIB_FLAVOR', "embed")]
         if self.backend:
@@ -822,45 +822,22 @@ class SharedTemplate(Template):
     def get_openzwave(self, url='https://codeload.github.com/OpenZWave/open-zwave/zip/master'):
         return True
 
-def parse_template(sysargv):
-    tmpl = None
-    flavor = None
-    if '--flavor=dev' in sysargv:
-        index = sysargv.index('--flavor=dev')
-        flavor = sysargv.pop(index)
-        tmpl =  DevTemplate(sysargv=sysargv)  
-    elif '--flavor=git' in sysargv:
-        index = sysargv.index('--flavor=git')
-        flavor = sysargv.pop(index)
-        tmpl =  GitTemplate(sysargv=sysargv)  
-    elif '--flavor=git_shared' in sysargv:
-        index = sysargv.index('--flavor=git_shared')
-        flavor = sysargv.pop(index)
-        tmpl =  GitSharedTemplate(sysargv=sysargv)
-    elif '--flavor=ozwdev' in sysargv:
-        index = sysargv.index('--flavor=ozwdev')
-        flavor = sysargv.pop(index)
-        tmpl =  OzwdevTemplate(sysargv=sysargv)  
-    elif '--flavor=ozwdev_shared' in sysargv:
-        index = sysargv.index('--flavor=ozwdev_shared')
-        flavor = sysargv.pop(index)
-        tmpl =  OzwdevSharedTemplate(sysargv=sysargv)
-    elif '--flavor=embed' in sysargv:
-        index = sysargv.index('--flavor=embed')
-        flavor = sysargv.pop(index)
-        tmpl =  EmbedTemplate(sysargv=sysargv)
-    elif '--flavor=embed_shared' in sysargv:
-        index = sysargv.index('--flavor=embed_shared')
-        flavor = sysargv.pop(index)
-        tmpl =  EmbedSharedTemplate(sysargv=sysargv)
-    elif '--flavor=shared' in sysargv:
-        index = sysargv.index('--flavor=shared')
-        flavor = sysargv.pop(index)
-        tmpl =  SharedTemplate(sysargv=sysargv)
-    if tmpl is None:
-        #Default template
-        flavor = 'embed'
-        tmpl = EmbedTemplate(sysargv=sysargv)
+def parse_template(sysargv, environ):
+    flavor = environ.get("PY_LIB_FLAVOR")
+    if flavor is None:
+        for i, arg in enumerate(sysargv):
+            print(arg)
+            if arg.startswith('--flavor='):
+                flavor = sysargv.pop(i).split('=')[1]
+                break
+        else:
+            flavor = 'embed'
+    print("*** flavor=%s" % flavor)
+    tmpl_name = "%sTemplate" % ''.join(map(str.capitalize, flavor.split('_')))
+    if tmpl_name not in globals():
+        raise RuntimeError("Unsupported flavor %r" % flavor)
+    cls = globals()[tmpl_name]
+    tmpl = cls(sysargv=sysargv)
     tmpl.flavor = flavor
     if '--cleanozw' in sysargv:
         index = sysargv.index('--cleanozw')
@@ -868,7 +845,7 @@ def parse_template(sysargv):
         tmpl.cleanozw = True
     return tmpl
     
-current_template = parse_template(sys.argv)
+current_template = parse_template(sys.argv, os.environ)
 
 def install_requires():
     pkgs = ['six']
