@@ -254,7 +254,7 @@ class Template(object):
         return ctx
         
     def install_requires(self):
-        return ['Cython']
+        return []
         
     def build_requires(self):
         return ['Cython']
@@ -855,6 +855,9 @@ def install_requires():
          pkgs.append('Louie>=1.1')
     pkgs += current_template.install_requires()
     return pkgs
+
+def build_requires():
+    return current_template.build_requires()
 
 def get_dirs(base):
     return [x for x in glob.iglob(os.path.join( base, '*')) if os.path.isdir(x) ]    

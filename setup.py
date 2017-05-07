@@ -34,7 +34,7 @@ from setuptools import setup, find_packages
 from distutils.extension import Extension
 from pyozw_version import pyozw_version
 from pyozw_setup import LOCAL_OPENZWAVE, SETUP_DIR
-from pyozw_setup import current_template, parse_template, get_dirs, data_files_config, install_requires
+from pyozw_setup import current_template, parse_template, get_dirs, data_files_config, install_requires, build_requires
 from pyozw_setup import get_default_exts, cython_context, cpp_context, pybind_context, system_context, cython_context
 from pyozw_setup import Template, DevTemplate, GitTemplate, EmbedTemplate, SharedTemplate
 from pyozw_setup import bdist_egg, build_openzwave, openzwave_config, build, clean, develop, install
@@ -77,6 +77,7 @@ setup(
         find_packages('src-manager', exclude=["scripts"]) +
         find_packages('src-python_openzwave', exclude=["scripts"]),
   install_requires = install_requires(),
+  setup_requires = build_requires(),
   description = 'python_openzwave is a python wrapper for the openzwave c++ library.',
   long_description = 'A full API to map the ZWave network in Python objects. Look at examples at : https://github.com/OpenZWave/python-openzwave',
   download_url = 'https://raw.githubusercontent.com/OpenZWave/python-openzwave/master/archives/python_openzwave-{0}.zip'.format(pyozw_version),
